@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output="../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  password  String
+  name      String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  workspaces Workspace[]
+  documents  Document[]
+}
+
+model Workspace {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents   Document[]
+  chats       Chat[]
+}
+
+model Document {
+  id           String    @id @default(cuid())
+  filename     String
+  size         Int
+  type         String
+  uploadStatus String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  url          String?   // Local path or cloud URL
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chats        Chat[]
+}
+
+model Chat {
+  id          String    @id @default(cuid())
+  title       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  documentId  String?
+  document    Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  messages    Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  role      String   // USER or AI
+  createdAt DateTime @default(now())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
