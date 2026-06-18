@@ -11,7 +11,7 @@ export class AuthController {
   }
 
 
-  @HttpCode(HttpStaus.OK)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() loginDto: LoginDto){
     return this.authService.login(loginDto);

@@ -6,8 +6,8 @@
 **Goal:** Create a professional backend foundation.
 - [x] Project Setup (NestJS, Prisma, PostgreSQL, ESLint/Prettier, Env config)
 - [x] Database Schema (User, Workspace, Document, Chat, Message)
-- [ ] Authentication (Signup, Login, Password hashing, JWT auth)
-- [ ] Prisma Service (Global Prisma module)
+- [x] Authentication (Signup, Login, Password hashing, JWT auth)
+- [x] Prisma Service (Global Prisma module)
 
 ### PHASE 2 — Document Infrastructure (Week 2)
 **Goal:** Handle document uploads properly.
