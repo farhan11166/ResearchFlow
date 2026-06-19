@@ -11,10 +11,10 @@
 
 ### PHASE 2 — Document Infrastructure (Week 2)
 **Goal:** Handle document uploads properly.
-- [ ] File Upload (Multer, local file storage)
-- [ ] Document Entity (filename, size, type, upload status, owner)
-- [ ] PDF Parsing (Extract text using `pdf-parse`)
-- [ ] Workspace Support (Organize documents)
+- [x] File Upload (Multer, local file storage)
+- [x] Document Entity (filename, size, type, upload status, owner)
+- [x] PDF Parsing (Extract text using `pdf-parse`)
+- [x] Workspace Support (Organize documents)
 
 ### PHASE 3 — AI Pipeline (Week 3)
 **Goal:** Build embeddings pipeline.

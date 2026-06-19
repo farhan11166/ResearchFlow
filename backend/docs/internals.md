@@ -37,14 +37,24 @@ ResearchFlow/
         │   ├── prisma.module.ts   ← Global DB module
         │   └── prisma.service.ts  ← DB connection + Prisma client
         │
-        └── auth/
-            ├── auth.module.ts     ← Auth module wiring
-            ├── auth.controller.ts ← HTTP route handlers
-            ├── auth.service.ts    ← Business logic (signup, login)
-            ├── auth.dto.ts        ← Request validation shapes
-            ├── jwt.strategy.ts    ← Token validation logic
-            └── jwt-auth.guard.ts  ← Route protection gate
-```
+        ├── auth/
+        │   ├── auth.module.ts     ← Auth module wiring
+        │   ├── auth.controller.ts ← HTTP route handlers
+        │   ├── auth.service.ts    ← Business logic (signup, login)
+        │   ├── auth.dto.ts        ← Request validation shapes
+        │   ├── jwt.strategy.ts    ← Token validation logic
+        │   └── jwt-auth.guard.ts  ← Route protection gate
+        │
+        ├── documents/
+        │   ├── documents.module.ts
+        │   ├── documents.controller.ts  ← Multer upload logic
+        │   └── documents.service.ts     ← PDF parsing & DB saving
+        │
+        └── workspaces/
+            ├── workspaces.module.ts
+            ├── workspaces.controller.ts
+            ├── workspaces.service.ts
+            └── workspaces.dto.ts
 
 ---
 
@@ -55,17 +65,27 @@ AppModule
   ├── PrismaModule (@Global)
   │     └── provides: PrismaService ──────────────────────┐
   │                                                        │ (auto-injected everywhere)
-  └── AuthModule                                           │
-        ├── imports: PassportModule                        │
-        ├── imports: JwtModule                             │
-        │     └── provides: JwtService                    │
-        ├── controllers: AuthController                    │
-        │     └── injects: AuthService                     │
-        └── providers:                                     │
-              ├── AuthService                              │
-              │     ├── injects: PrismaService ◄───────────┘
-              │     └── injects: JwtService
-              └── JwtStrategy
+  ├── AuthModule                                           │
+  │     ├── imports: PassportModule                        │
+  │     ├── imports: JwtModule                             │
+  │     │     └── provides: JwtService                     │
+  │     ├── controllers: AuthController                    │
+  │     │     └── injects: AuthService                     │
+  │     └── providers:                                     │
+  │           ├── AuthService                              │
+  │           │     ├── injects: PrismaService ◄───────────┤
+  │           │     └── injects: JwtService                │
+  │           └── JwtStrategy                              │
+  │                 └── injects: PrismaService ◄───────────┤
+  ├── DocumentsModule                                      │
+  │     ├── controllers: DocumentsController               │
+  │     │     └── injects: DocumentsService                │
+  │     └── providers: DocumentsService                    │
+  │                 └── injects: PrismaService ◄───────────┤
+  └── WorkspacesModule                                     │
+        ├── controllers: WorkspacesController              │
+        │     └── injects: WorkspacesService               │
+        └── providers: WorkspacesService                   │
                     └── injects: PrismaService ◄───────────┘
 ```
 

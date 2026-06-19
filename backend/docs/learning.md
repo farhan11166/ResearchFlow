@@ -220,6 +220,36 @@ Prisma 7 introduced **driver adapters** — instead of Prisma managing the datab
 
 ---
 
+## File Uploads & Multipart Form Data
+
+When a user uploads a file, they don't send standard JSON. They send `multipart/form-data`.
+
+### How Multer Works
+
+`multipart/form-data` splits the request body into multiple boundaries (parts). One part might be the file, another might be a text field.
+
+In NestJS, we use **Multer** via the `@nestjs/platform-express` wrapper to intercept and parse these boundaries:
+
+```typescript
+@UseInterceptors(FileInterceptor('file')) // Intercepts the part named 'file'
+```
+
+- Multer streams the file directly to your disk (`destination: './uploads'`).
+- Once finished, it creates a `file` object with metadata (name, size, mimetype).
+- It injects that object into your controller via `@UploadedFile()`.
+
+### The Postman Order Trap
+
+Because Multer reads the incoming request as a **stream** from top to bottom, the **order of fields matters**.
+
+If your `multipart/form-data` payload has:
+1. `file`
+2. `workspaceId`
+
+Multer might process the file, trigger the controller, and ignore the remaining fields. Always put your **text fields above your file fields** in API clients like Postman.
+
+---
+
 ## Glossary
 
 | Term | Meaning |
