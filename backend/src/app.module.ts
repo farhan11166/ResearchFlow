@@ -5,9 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { DocumentsModule } from './documents/documents.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, DocumentsModule, WorkspacesModule],
+  imports: [AuthModule, PrismaModule, DocumentsModule, WorkspacesModule, AiModule],
   controllers: [AppController],
   providers: [AppService],
 })

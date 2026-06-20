@@ -18,8 +18,8 @@
 
 ### PHASE 3 — AI Pipeline (Week 3)
 **Goal:** Build embeddings pipeline.
-- [ ] Chunking (Split text into chunks)
-- [ ] Embeddings (OpenAI or Gemini)
+- [x] Chunking (Split text into chunks)
+- [x] Embeddings (OpenAI or Gemini)
 - [ ] Vector DB (Qdrant to store vectors, metadata, chunk references)
 - [ ] Background Workers (Redis, BullMQ to process embeddings async)
 
