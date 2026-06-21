@@ -20,13 +20,13 @@
 **Goal:** Build embeddings pipeline.
 - [x] Chunking (Split text into chunks)
 - [x] Embeddings (OpenAI or Gemini)
-- [ ] Vector DB (Qdrant to store vectors, metadata, chunk references)
-- [ ] Background Workers (Redis, BullMQ to process embeddings async)
+- [x] Vector DB (Qdrant to store vectors, metadata, chunk references)
+- [x] Background Workers (Redis, BullMQ to process embeddings async)
 
 ### PHASE 4 — Semantic Search + Chat (Week 4)
 **Goal:** Make the app intelligent.
-- [ ] Semantic Search (Endpoint `/search` returning chunks and metadata)
-- [ ] RAG Pipeline (Retrieval, prompt construction, LLM generation)
+- [x] Semantic Search (Endpoint `/search` returning chunks and metadata)
+- [x] RAG Pipeline (Retrieval, prompt construction, LLM generation)
 - [ ] Chat History (Store conversations and messages)
 - [ ] Streaming Responses (SSE or WebSockets)
 

@@ -45,23 +45,35 @@ ResearchFlow/
         │   ├── jwt.strategy.ts    ← Token validation logic
         │   └── jwt-auth.guard.ts  ← Route protection gate
         │
+        ├── ai/
+        │   ├── ai.module.ts
+        │   ├── ai.service.ts      ← Gemini Embeddings, Chunking, Qdrant
+        │   └── ai.processor.ts    ← BullMQ background worker
+        │
+        ├── chat/
+        │   ├── chat.module.ts
+        │   ├── chat.controller.ts ← POST /chat/new, POST /chat/:id/message
+        │   └── chat.service.ts    ← Prisma logic for Chat/Message memory
+        │
         ├── documents/
         │   ├── documents.module.ts
         │   ├── documents.controller.ts  ← Multer upload logic
-        │   └── documents.service.ts     ← PDF parsing & DB saving
+        │   └── documents.service.ts     ← PDF parsing, drops job into Redis
         │
         └── workspaces/
             ├── workspaces.module.ts
             ├── workspaces.controller.ts
             ├── workspaces.service.ts
             └── workspaces.dto.ts
+```
 
 ---
 
 ## Module Dependency Tree
 
-```
+```text
 AppModule
+  ├── imports: BullModule.forRoot() (Redis Connection)
   ├── PrismaModule (@Global)
   │     └── provides: PrismaService ──────────────────────┐
   │                                                        │ (auto-injected everywhere)
@@ -77,10 +89,24 @@ AppModule
   │           │     └── injects: JwtService                │
   │           └── JwtStrategy                              │
   │                 └── injects: PrismaService ◄───────────┤
+  ├── AiModule                                             │
+  │     ├── imports: BullModule.registerQueue()            │
+  │     └── providers:                                     │
+  │           ├── AiService                                │
+  │           └── AiProcessor (Queue Consumer)             │
   ├── DocumentsModule                                      │
+  │     ├── imports: AiModule                              │
+  │     ├── imports: BullModule.registerQueue()            │
   │     ├── controllers: DocumentsController               │
   │     │     └── injects: DocumentsService                │
   │     └── providers: DocumentsService                    │
+  │                 ├── injects: PrismaService ◄───────────┤
+  │                 └── injects: Queue ('document-processing')
+  ├── ChatModule                                           │
+  │     ├── imports: AiModule                              │
+  │     ├── controllers: ChatController                    │
+  │     │     └── injects: ChatService, AiService          │
+  │     └── providers: ChatService                         │
   │                 └── injects: PrismaService ◄───────────┤
   └── WorkspacesModule                                     │
         ├── controllers: WorkspacesController              │

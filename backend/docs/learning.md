@@ -250,6 +250,38 @@ Multer might process the file, trigger the controller, and ignore the remaining 
 
 ---
 
+## AI Concepts: Embeddings & RAG
+
+AI language models (like ChatGPT or Gemini) have context limits and token costs. You cannot feed them a 500-page book for every single question. Instead, we use RAG.
+
+### 1. RAG (Retrieval-Augmented Generation)
+A framework that gives AI access to outside knowledge.
+1. **Retrieve:** Find the specific paragraphs that contain the answer to the user's question.
+2. **Augment:** Combine those paragraphs with the user's question.
+3. **Generate:** Feed the combination to the LLM so it can generate a human-readable answer.
+
+### 2. Chunking
+Splitting a massive document into smaller, overlapping paragraphs (e.g., 1000 characters with 200 character overlap). We overlap them so sentences aren't randomly cut in half, preserving context.
+
+### 3. Vector Embeddings
+Converting human text into math (a massive array of numbers, e.g., 3,072 dimensions). The numbers represent the *meaning* of the text. A chunk about "Dogs" will have math that places it closer to a chunk about "Cats" than a chunk about "Cars".
+
+### 4. Vector Database (Qdrant)
+PostgreSQL is terrible at searching arrays of 3,072 numbers. A Vector DB like Qdrant is highly optimized for "Cosine Similarity" math, allowing it to instantly find which stored text chunks mathematically match a user's search query vector.
+
+---
+
+## Architecture Concepts: Background Workers
+
+When a user uploads a PDF, chunking and embedding takes 10-30 seconds. If we wait for this to finish, the user stares at a loading spinner and the HTTP request might timeout.
+
+### The Queue System (BullMQ + Redis)
+1. **Redis:** A blazing fast in-memory database that acts as our queue.
+2. **Producer (`DocumentsService`):** Instantly replies `200 OK` to the user and drops a "Job" (e.g., "Process Document ID 123") into the Redis Queue.
+3. **Consumer / Worker (`AiProcessor`):** Runs silently in the background, grabs the job from Redis, talks to Gemini, and updates Qdrant. The main API is never blocked!
+
+---
+
 ## Glossary
 
 | Term | Meaning |

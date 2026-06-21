@@ -65,3 +65,22 @@ A masterlist of the errors encountered during development, why they happened, an
 **Error:** `workspaceId` was saving as null despite being correctly parsed.
 **Why it happened:** Extracted `@Body('workspaceId') workspaceId` in the controller method signature, but forgot to pass it as the third argument to `this.documentsService.saveDocument(file, req.user.id)`.
 **The Fix:** Pass the variable: `this.documentsService.saveDocument(file, req.user.id, workspaceId)`.
+
+---
+
+## Phase 3 & 4: AI Pipeline Errors
+
+### 11. Malformed Google API URL (Trailing Whitespace)
+**Error:** `[404 Not Found] models/... is not found for API version v1beta`
+**Why it happened:** The Google SDK attaches the API key to the query string (`?key=...`). If the `.env` file has a hidden trailing space or newline after the key, it corrupts the URL completely.
+**The Fix:** Always call `.trim()` on environment variables used in URLs: `new GoogleGenerativeAI(apiKey.trim())`.
+
+### 12. Deprecated / Unlisted AI Models
+**Error:** `[404 Not Found] models/gemini-1.5-flash is not found`
+**Why it happened:** Google constantly updates model names (`text-embedding-004` -> `gemini-embedding-2`, `gemini-1.5-flash` -> `gemini-3.5-flash`) based on the age of the API key and region.
+**The Fix:** Use a script to query `https://generativelanguage.googleapis.com/v1beta/models` directly to see the exact model strings available to the specific API key.
+
+### 13. Strict TypeScript Null Checks (Qdrant Payload)
+**Error:** `match.payload is possibly 'null' or 'undefined'.`
+**Why it happened:** Qdrant returns vector matches with an optional `payload` (metadata) object. TypeScript refuses to let you do `match.payload.text` because the payload might not exist.
+**The Fix:** Use optional chaining: `match.payload?.text`.

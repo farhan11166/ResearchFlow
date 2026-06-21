@@ -11,5 +11,12 @@ services:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
+  redis:
+    image: redis:alpine
+    container_name: researchflow-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
 volumes:
   qdrant_data:
