@@ -27,7 +27,7 @@
 **Goal:** Make the app intelligent.
 - [x] Semantic Search (Endpoint `/search` returning chunks and metadata)
 - [x] RAG Pipeline (Retrieval, prompt construction, LLM generation)
-- [ ] Chat History (Store conversations and messages)
+- [x] Chat History (Store conversations and messages)
 - [ ] Streaming Responses (SSE or WebSockets)
 
 ### PHASE 5 — Backend Engineering Depth (Week 5)

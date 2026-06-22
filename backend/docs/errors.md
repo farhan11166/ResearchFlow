@@ -84,3 +84,13 @@ A masterlist of the errors encountered during development, why they happened, an
 **Error:** `match.payload is possibly 'null' or 'undefined'.`
 **Why it happened:** Qdrant returns vector matches with an optional `payload` (metadata) object. TypeScript refuses to let you do `match.payload.text` because the payload might not exist.
 **The Fix:** Use optional chaining: `match.payload?.text`.
+
+### 14. Prisma Foreign Key Constraint (P2003)
+**Error:** `Foreign key constraint violated on the constraint: Chat_workspaceId_fkey`
+**Why it happened:** Tried to create a `Chat` linked to a `workspaceId` (`cmqpodfp...`) that did not actually exist in the Postgres `Workspace` table. Because the database enforces strict referential integrity, it blocked the insert.
+**The Fix:** Ensure the parent record exists first! Create a Workspace, grab its real ID, and pass that ID into the Chat creation request.
+
+### 15. Invisible URL Characters in Postman (404 Not Found)
+**Error:** `"Cannot POST /chat/.../message%0A"` (404 Not Found)
+**Why it happened:** When copying an ID from a JSON response and pasting it into the Postman URL bar, an invisible "Enter/Newline" character was accidentally copied. Browsers and Postman URL-encode this character as `%0A`, appending it to the route and breaking the endpoint path.
+**The Fix:** Click at the very end of the URL in Postman and hit Backspace to delete any hidden line breaks.

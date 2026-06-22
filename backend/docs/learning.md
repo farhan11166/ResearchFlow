@@ -282,6 +282,18 @@ When a user uploads a PDF, chunking and embedding takes 10-30 seconds. If we wai
 
 ---
 
+## AI Concepts: Memory & Streaming
+
+### 1. Chat History (LLM Memory)
+AI models are completely stateless—they suffer from permanent amnesia. If you ask "What is my favorite color?", they don't remember the previous request where you told them. 
+To build "Memory", you must save the entire conversation history in a database (like PostgreSQL) and re-inject the previous messages into the Prompt every single time you ask a new question.
+
+### 2. Streaming (Server-Sent Events)
+LLMs generate text one token (word) at a time. If an AI writes a 3-paragraph answer, standard HTTP requests will wait 45+ seconds for the entire answer to finish before sending a response. This causes users to think the app is broken.
+Instead, we use a stream pipe. As the AI generates the very first word, it is instantly piped to the frontend using **Server-Sent Events (SSE)**. The frontend receives the response in chunks over a persistent HTTP connection, creating the "typing" effect seen in ChatGPT.
+
+---
+
 ## Glossary
 
 | Term | Meaning |

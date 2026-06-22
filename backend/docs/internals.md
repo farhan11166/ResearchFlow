@@ -278,6 +278,67 @@ export class JwtAuthGuard extends AuthGuard('jwt') {}
 5. Route handler runs, can access req.user
 ```
 
+### POST /chat/:chatId/message (Full RAG Pipeline)
+
+```
+1. Request arrives with body: `query`
+         │
+         ▼
+2. ChatController.sendMessage()
+         │
+         ▼
+3. ChatService.savemsg() → Instantly saves User query to Postgres DB
+         │
+         ▼
+4. AiService.searchSimilarChunks(query)
+   a. Hits Gemini to turn query into Vector
+   b. Hits Qdrant to find matching context paragraphs
+         │
+         ▼
+5. AiService.generateAnswer(query, contextTexts, history)
+   a. Constructs Prompt with conversation history + document context
+   b. Hits Gemini `gemini-3.5-flash` for language generation
+         │
+         ▼
+6. ChatService.savemsg() → Saves AI response to Postgres DB
+         │
+         ▼
+7. Returns AI answer & source paragraphs to User
+```
+
+### POST /chat/:chatId/stream (Streaming RAG with SSE)
+
+```
+1. Request arrives with body: `query`
+         │
+         ▼
+2. ChatController.streamMsg()
+         │
+         ▼
+3. ChatService.savemsg() → Instantly saves User query to Postgres DB
+         │
+         ▼
+4. Set HTTP Headers: `Content-Type: text/event-stream`
+   (This tells the client to keep the connection open for chunks)
+         │
+         ▼
+5. Fetch History (Prisma) & Context Chunks (Qdrant)
+         │
+         ▼
+6. AiService.generateAnswerStream() 
+   Returns an async iterable Stream Pipe connected to Gemini
+         │
+         ▼
+7. Loop: `for await (const chunk of stream)`
+   • Write `data: {text: chunk}` directly to `res`
+   • Instantly hits the client in real-time
+         │
+         ▼
+8. Stream finishes. 
+   ChatService.savemsg() → Saves the full combined string to DB
+   res.end() → Closes the connection.
+```
+
 ---
 
 ## Prisma Setup (Prisma 7 Specifics)
