@@ -28,7 +28,7 @@
 - [x] Semantic Search (Endpoint `/search` returning chunks and metadata)
 - [x] RAG Pipeline (Retrieval, prompt construction, LLM generation)
 - [x] Chat History (Store conversations and messages)
-- [ ] Streaming Responses (SSE or WebSockets)
+- [x] Streaming Responses (SSE or WebSockets)
 
 ### PHASE 5 — Backend Engineering Depth (Week 5)
 **Goal:** Make it production-grade.

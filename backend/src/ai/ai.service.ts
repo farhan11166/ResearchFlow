@@ -136,6 +136,30 @@ export class AiService implements OnModuleInit {
 
     }
 
+    async generateAnswerStream(query: string, contextChunks: string[], chatHistory:{role: string, content: string}[]){
+        const contextText = contextChunks.join('\n\n---\n\n');
+        const historyText = chatHistory.map(msg =>
+            `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`
+        ).join('\n\n');
+        const prompt = `
+            You are a helpful AI research assistant. 
+            Answer the user's question using ONLY the provided document context below. 
+            If the answer is not contained in the context, say "I cannot find the answer in the provided documents."
+            Do not use outside knowledge.
+            PREVIOUS CONVERSATION HISTORY:
+            ${historyText || 'No previous conversation.'}
+            CONTEXT:
+            ${contextText}
+            USER QUESTION: 
+            ${query}
+        `;
+        const model = this.genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
+
+        const result = await model.generateContentStream(prompt);
+        return result.stream;
+
+    }
+
 }
 
 
