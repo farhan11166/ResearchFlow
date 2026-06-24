@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Param, Res } from '@nestjs/common';
+import { Controller, Post, Body, Param, Res, UseGuards, Request } from '@nestjs/common';
 import type { Response } from 'express';
 import { AiService } from '../ai/ai.service';
 import { ChatService } from './chat.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('chat')
 export class ChatController {
     constructor(private readonly aiService: AiService,
@@ -10,10 +12,9 @@ export class ChatController {
     ){}
 
     @Post('new')
-    async createChat(@Body('workspaceId') workspaceId: string){
+    async createChat(@Body('workspaceId') workspaceId: string, @Request() req) {
          if (!workspaceId) return { error: 'workspaceId is required' };
-        return this.chatService.creachat(workspaceId);
-
+        return this.chatService.creachat(workspaceId, req.user.id);
     }
     
     @Post(':chatId/stream')

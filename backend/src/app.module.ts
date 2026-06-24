@@ -12,6 +12,8 @@ import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import {CacheModule} from '@nestjs/cache-manager';
+import {redisStore}  from 'cache-manager-redis-yet';
 @Module({
   imports: [
     BullModule.forRoot({
@@ -24,6 +26,20 @@ import { APP_GUARD } from '@nestjs/core';
             ttl:60000,
             limit: 10,
         }]),
+      CacheModule.registerAsync({
+        isGlobal: true,
+        useFactory: async() =>({
+          store: await redisStore({
+            socket:{
+              host: 'localhost',
+              port: 6379,
+            },
+            ttl: 30000,
+          }),
+
+        }),
+
+      }),  
     AuthModule, 
     PrismaModule, 
     DocumentsModule, 

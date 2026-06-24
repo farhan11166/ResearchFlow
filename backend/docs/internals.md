@@ -207,6 +207,43 @@ export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 ---
 
+## System Architecture & Code Connections
+
+Understanding how the different parts of the code connect to each other is crucial for debugging and extending the app. Here is the strict hierarchical flow of our NestJS architecture:
+
+### 1. The Controller Layer (`*.controller.ts`)
+**Purpose:** The Gatekeeper and Traffic Cop.
+**Connections:**
+- Receives HTTP Requests from the outside world (Frontend/Postman).
+- Uses `@UseGuards(JwtAuthGuard)` to verify the user's JWT token via `AuthModule`.
+- Uses `ThrottlerGuard` (in `app.module.ts`) to block rate-limit abusers.
+- Extracts `req.user.id` and the JSON `@Body()`.
+- **Passes data downward** to the Service Layer. It should *never* write to the database itself.
+
+### 2. The Service Layer (`*.service.ts`)
+**Purpose:** The Business Logic & Database Manager.
+**Connections:**
+- Receives clean data from the Controller.
+- Uses `PrismaService` to query and mutate the Postgres Database.
+- Uses `CACHE_MANAGER` (Redis) to instantly fetch cached data and avoid slow Postgres queries.
+- **Passes heavy tasks sideways** to the Queue (e.g., `DocumentsService` passes embedding tasks to `BullMQ`).
+
+### 3. The Queue Workers (`*.processor.ts` / Background Workers)
+**Purpose:** Asynchronous Heavy Lifters.
+**Connections:**
+- Listens to BullMQ/Redis for new jobs.
+- Has no idea what a Controller or an HTTP request is.
+- Runs independently. When `AiProcessor` gets a job, it connects to Gemini (via `AiService`), generates vector embeddings, and saves them to Qdrant.
+
+### 4. The AI Service (`ai.service.ts`)
+**Purpose:** The Core Engine.
+**Connections:**
+- Connects outwards to external APIs (`generativelanguage.googleapis.com` / Gemini).
+- Connects outwards to our Vector Database (`Qdrant` on port 6333).
+- Used by the `ChatController` to pipe streams directly to the user.
+
+---
+
 ## Request Lifecycle Traces
 
 ### POST /auth/signup

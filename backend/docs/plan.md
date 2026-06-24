@@ -32,10 +32,10 @@
 
 ### PHASE 5 — Backend Engineering Depth (Week 5)
 **Goal:** Make it production-grade.
-- [ ] Redis Caching (Search results, chats, embeddings)
-- [ ] Rate Limiting (Protect endpoints)
+- [x] Redis Caching (Search results, chats, workspaces)
+- [x] Rate Limiting (Protect endpoints via Throttler)
 - [ ] Logging (Pino/Winston)
-- [ ] Error Handling (Global exception filters)
+- [x] Error Handling (Global exception filters)
 - [ ] Retry Mechanisms (BullMQ retries)
 
 ### PHASE 6 — Advanced Features (Week 6)

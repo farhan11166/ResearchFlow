@@ -5,5 +5,26 @@ import { Response } from 'express';
 export class AllExceptionsFilter implements ExceptionFilter{
 catch(exception: unknown, host: ArgumentsHost){
     const ctx = host.switchToHttp();
+
+    const resp= ctx.getResponse<Response>();
+
+
+    const status=
+    exception instanceof HttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const message=
+      exception instanceof HttpException
+        ? exception.getResponse()
+        :'An unexpected internal server error occured';
+
+    resp.status(status).json({
+      success: false,
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      error: message,
+    });
+
 }
 }
