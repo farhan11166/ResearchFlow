@@ -10,7 +10,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { ChatService } from './chat/chat.service';
 import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
-
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
     BullModule.forRoot({
@@ -19,6 +20,10 @@ import { ChatModule } from './chat/chat.module';
         port: 6379,
       },
     }),
+     ThrottlerModule.forRoot([{
+            ttl:60000,
+            limit: 10,
+        }]),
     AuthModule, 
     PrismaModule, 
     DocumentsModule, 
@@ -26,6 +31,11 @@ import { ChatModule } from './chat/chat.module';
     AiModule, ChatModule
   ],
   controllers: [AppController, ChatController],
-  providers: [AppService, ChatService],
+  providers: [    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    AppService, 
+    ChatService],
 })
 export class AppModule {}

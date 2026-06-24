@@ -2,9 +2,33 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import pdfParse from 'pdf-parse';
+import { Module } from '@nestjs/common';
 import { AiService } from '../ai/ai.service'; // ← Import this
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+
+
+@Module({
+imports: [
+    ThrottlerModule.forRoot([{
+        ttl:60000,
+        limit: 10,
+    }]),
+],
+providers:[
+    {
+        provide: APP_GUARD,
+        useClass: ThrottlerGuard,
+    },
+],
+
+
+
+
+})
+
 
 @Injectable()
 export class DocumentsService {
@@ -42,3 +66,4 @@ export class DocumentsService {
         return document;
     }
 }
+
