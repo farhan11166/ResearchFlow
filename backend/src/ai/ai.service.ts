@@ -104,7 +104,7 @@ export class AiService implements OnModuleInit {
                 must: [
                     {
                         key: "documentId",
-                        mathc:{
+                        match: {
                             any: documentIds
                         }
                     },

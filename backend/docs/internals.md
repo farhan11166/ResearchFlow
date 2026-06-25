@@ -244,6 +244,27 @@ Understanding how the different parts of the code connect to each other is cruci
 
 ---
 
+## Workspace Isolation & Vector Search
+
+To prevent AI hallucinations and data leakage between projects (e.g. asking a question in "Math" and getting answers from "Biology"), we implement **Strict Workspace Isolation** at the Vector Database level.
+
+1. **Prisma Validation:** When a user sends a message to `/chat/:chatId/stream`, `ChatService` queries Postgres to fetch every `documentId` that belongs to the workspace linked to that chat.
+2. **Security Gate:** If the user does not own the workspace, the request is instantly rejected (`403 Forbidden`).
+3. **Qdrant Must Filter:** The array of allowed `documentIds` is passed into `aiService.searchSimilarChunks()`. We apply a strict Qdrant `must` filter:
+```typescript
+filter = {
+    must: [
+        {
+            key: "documentId",
+            match: { any: documentIds } // Only return vectors belonging to these exact documents
+        }
+    ]
+}
+```
+This guarantees the RAG context passed to Gemini is perfectly scoped to the user's specific workspace.
+
+---
+
 ## Request Lifecycle Traces
 
 ### POST /auth/signup
