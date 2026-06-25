@@ -37,4 +37,22 @@ export class ChatService {
             }
         });
     }
+    async getChatDocumentIds(chatId: string, userId: string): Promise<string[]> {
+
+        const chat = await this.prisma.chat.findUnique({
+            where: {id: chatId},
+            // selects all worksapce and document ids
+            include: {workspace:{include:{documents: { select: {id: true}}}}}
+
+        });
+
+        if(!chat) throw new NotFoundException('Chat not found');
+
+
+        if(chat.workspace.userId !== userId) throw new ForbiddenException('You do not own this chat!');
+
+         // Return an array of pure document IDs (e.g. ["doc1", "doc2"])
+        return chat.workspace.documents.map(doc => doc.id);
+    }
+
 }

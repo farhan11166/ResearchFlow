@@ -10,24 +10,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
 
-@Module({
-imports: [
-    ThrottlerModule.forRoot([{
-        ttl:60000,
-        limit: 10,
-    }]),
-],
-providers:[
-    {
-        provide: APP_GUARD,
-        useClass: ThrottlerGuard,
-    },
-],
 
-
-
-
-})
 
 
 @Injectable()
@@ -56,13 +39,20 @@ export class DocumentsService {
                 workspaceId: workspaceId || null,
             },
         });
-
-        // Add the heavy AI processing to the background queue!
-        await this.documentQueue.add('process-document', {
+// Add the heavy AI processing to the background queue!
+        await this.documentQueue.add('process-document',{
             documentId: document.id,
             text: extractedText
+        },{
+
+            attempts: 3,
+            backoff: {
+                type: 'exponential',
+                delay: 5000,
+            }
         });
 
+        
         return document;
     }
 }

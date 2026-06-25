@@ -14,6 +14,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import {CacheModule} from '@nestjs/cache-manager';
 import {redisStore}  from 'cache-manager-redis-yet';
+import { LoggerModule } from 'nestjs-pino';
 @Module({
   imports: [
     BullModule.forRoot({
@@ -40,6 +41,16 @@ import {redisStore}  from 'cache-manager-redis-yet';
         }),
 
       }),  
+    LoggerModule.forRoot({
+      pinoHttp:{
+        transport: {
+          target:'pino-pretty',
+          options: {
+            singleLine: true,
+          },
+        },
+      },
+    })  ,
     AuthModule, 
     PrismaModule, 
     DocumentsModule, 

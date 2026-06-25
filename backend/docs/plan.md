@@ -34,15 +34,15 @@
 **Goal:** Make it production-grade.
 - [x] Redis Caching (Search results, chats, workspaces)
 - [x] Rate Limiting (Protect endpoints via Throttler)
-- [ ] Logging (Pino/Winston)
+- [x] Logging (Pino/Winston)
 - [x] Error Handling (Global exception filters)
-- [ ] Retry Mechanisms (BullMQ retries)
+- [x] Retry Mechanisms (BullMQ retries)
 
 ### PHASE 6 — Advanced Features (Week 6)
 **Goal:** Add 2-3 advanced capabilities.
 - [ ] Citations (Highlight source chunks)
-- [ ] Multi-document Search (Query across many PDFs)
-- [ ] Workspace Chat (Chat scoped to collections)
+- [x] Multi-document Search (Query across many PDFs)
+- [x] Workspace Chat (Chat scoped to collections)
 - [ ] OCR (Support scanned PDFs)
 
 ### PHASE 7 — Deployment + Polish (Week 7)

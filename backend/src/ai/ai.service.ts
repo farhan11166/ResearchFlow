@@ -91,14 +91,32 @@ export class AiService implements OnModuleInit {
 
         console.log(`✅ Successfully stored ${points.length} chunks in Qdrant Vector DB!`);
     }
-    async searchSimilarChunks(query: string,limit: number = 4){
+    async searchSimilarChunks(query: string,limit: number = 4, documentIds?: string[]){
         const model = this.genAI.getGenerativeModel({model: 'gemini-embedding-2'});
         const result = await model.embedContent(query);
         const queryVector = result.embedding.values;
 
+
+        let filter=undefined;
+
+        if(documentIds && documentIds.length > 0){
+            filter={
+                must: [
+                    {
+                        key: "documentId",
+                        mathc:{
+                            any: documentIds
+                        }
+                    },
+                    
+                ]
+            };
+        }
+
         const searchResults = await this.qdrant.search('documents',{
             vector: queryVector,
             limit: limit,
+            filter: filter,
             with_payload: true,
         });
        return searchResults.map(match =>({

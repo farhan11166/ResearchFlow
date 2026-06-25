@@ -18,7 +18,7 @@ export class ChatController {
     }
     
     @Post(':chatId/stream')
-    async sendMsg(@Param('chatId') chatId: string, @Body('query') query:string, @Res() res: Response){
+    async sendMsg(@Param('chatId') chatId: string, @Body('query') query:string,@Request() req, @Res() res: Response){
         if(!query) return res.status(400).json({error: ' Search query is required'});
         await this.chatService.savemsg(chatId,'USER',query);
 
@@ -29,7 +29,9 @@ export class ChatController {
 
         const history = await this.chatService.getHist(chatId);
 
-        const matches = await this.aiService.searchSimilarChunks(query);
+        const allowedDocumentIds = await this.chatService.getChatDocumentIds(chatId, req.user.id);
+
+        const matches = await this.aiService.searchSimilarChunks(query, 4, allowedDocumentIds);
         const contextTexts = matches.map(m=>String(m.text));
         
         try {
