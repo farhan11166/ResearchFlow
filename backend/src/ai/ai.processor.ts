@@ -11,12 +11,14 @@ export class AiProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    console.log(`[Queue Worker] Picked up job ${job.id} for document ${job.data.documentId}`);
-    
+    console.log(
+      `[Queue Worker] Picked up job ${job.id} for document ${job.data.documentId}`,
+    );
+
     try {
       await this.aiService.processAndStoreDocument(
         job.data.documentId,
-        job.data.text
+        job.data.text,
       );
       console.log(`[Queue Worker] Finished job ${job.id} successfully!`);
     } catch (error) {

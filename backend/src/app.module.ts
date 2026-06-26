@@ -12,8 +12,8 @@ import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import {CacheModule} from '@nestjs/cache-manager';
-import {redisStore}  from 'cache-manager-redis-yet';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 import { LoggerModule } from 'nestjs-pino';
 import { HealthModule } from './health/health.module';
 @Module({
@@ -24,46 +24,50 @@ import { HealthModule } from './health/health.module';
         port: 6379,
       },
     }),
-     ThrottlerModule.forRoot([{
-            ttl:60000,
-            limit: 10,
-        }]),
-      CacheModule.registerAsync({
-        isGlobal: true,
-        useFactory: async() =>({
-          store: await redisStore({
-            socket:{
-              host: 'localhost',
-              port: 6379,
-            },
-            ttl: 30000,
-          }),
-
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: 'localhost',
+            port: 6379,
+          },
+          ttl: 30000,
         }),
-
-      }),  
+      }),
+    }),
     LoggerModule.forRoot({
-      pinoHttp:{
+      pinoHttp: {
         transport: {
-          target:'pino-pretty',
+          target: 'pino-pretty',
           options: {
             singleLine: true,
           },
         },
       },
-    })  ,
-    AuthModule, 
-    PrismaModule, 
-    DocumentsModule, 
-    WorkspacesModule, 
-    AiModule, ChatModule, HealthModule
+    }),
+    AuthModule,
+    PrismaModule,
+    DocumentsModule,
+    WorkspacesModule,
+    AiModule,
+    ChatModule,
+    HealthModule,
   ],
   controllers: [AppController, ChatController],
-  providers: [    {
+  providers: [
+    {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    AppService, 
-    ChatService],
+    AppService,
+    ChatService,
+  ],
 })
 export class AppModule {}

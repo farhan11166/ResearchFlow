@@ -4,7 +4,9 @@ import {
   UseInterceptors,
   UploadedFile,
   UseGuards,
-  Request, BadRequestException, Body,
+  Request,
+  BadRequestException,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -43,10 +45,8 @@ export class DocumentsController {
     @Request() req,
     @Body('workspaceId') workspaceId?: string,
   ) {
-    
-    if(!file){
-        throw new BadRequestException('No file uploaded');
-
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
     }
     return this.documentService.saveDocument(file, req.user.id, workspaceId);
   }

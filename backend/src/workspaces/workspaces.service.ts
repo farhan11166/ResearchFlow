@@ -8,7 +8,7 @@ import { CreateWorkspaceDto } from './workspaces.dto';
 export class WorkspacesService {
   constructor(
     private prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async createWorkspace(dto: CreateWorkspaceDto, userId: string) {

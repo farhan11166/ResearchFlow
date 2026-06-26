@@ -12,6 +12,6 @@ import { BullModule } from '@nestjs/bullmq';
     }),
   ],
   controllers: [DocumentsController],
-  providers: [DocumentsService]
+  providers: [DocumentsService],
 })
 export class DocumentsModule {}
