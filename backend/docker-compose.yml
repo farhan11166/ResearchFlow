@@ -1,6 +1,39 @@
 version: '3.8'
 
 services:
+  # 1. YOUR NESTJS BACKEND
+  api:
+    build: .
+    container_name: researchflow-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@postgres:5432/researchflow?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QDRANT_URL=http://qdrant:6333
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    restart: unless-stopped
+
+  # 2. YOUR POSTGRES DATABASE
+  postgres:
+    image: postgres:15
+    container_name: researchflow-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: researchflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # 3. YOUR EXISTING QDRANT
   qdrant:
     image: qdrant/qdrant:latest
     container_name: researchflow-qdrant
@@ -11,6 +44,7 @@ services:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
+  # 4. YOUR EXISTING REDIS
   redis:
     image: redis:alpine
     container_name: researchflow-redis
@@ -19,4 +53,5 @@ services:
     restart: unless-stopped
 
 volumes:
+  pgdata:
   qdrant_data:

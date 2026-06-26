@@ -97,7 +97,7 @@ export class AiService implements OnModuleInit {
         const queryVector = result.embedding.values;
 
 
-        let filter=undefined;
+        let filter: any = undefined;
 
         if(documentIds && documentIds.length > 0){
             filter={
@@ -155,19 +155,29 @@ export class AiService implements OnModuleInit {
     }
 
     async generateAnswerStream(query: string, contextChunks: string[], chatHistory:{role: string, content: string}[]){
-        const contextText = contextChunks.join('\n\n---\n\n');
+        // NEW: Number each chunk so the AI knows its source ID
+        const contextText = contextChunks.map((chunk, index) => `[Source ${index + 1}]\n${chunk}`).join('\n\n---\n\n');
+        
         const historyText = chatHistory.map(msg =>
             `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`
         ).join('\n\n');
+
         const prompt = `
             You are a helpful AI research assistant. 
             Answer the user's question using ONLY the provided document context below. 
+            
+            CRITICAL INSTRUCTION: When using information from the context, YOU MUST cite your sources using the [Source X] format inline. 
+            Example: "The mitochondria is the powerhouse of the cell [Source 1]."
+            
             If the answer is not contained in the context, say "I cannot find the answer in the provided documents."
             Do not use outside knowledge.
+
             PREVIOUS CONVERSATION HISTORY:
             ${historyText || 'No previous conversation.'}
+            
             CONTEXT:
             ${contextText}
+            
             USER QUESTION: 
             ${query}
         `;

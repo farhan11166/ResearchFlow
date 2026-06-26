@@ -8,7 +8,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-
+import * as Tesseract from 'tesseract.js';
+import * as pdf2img from 'pdf-img-convert';
 
 
 
@@ -25,7 +26,26 @@ export class DocumentsService {
         const fileBuffer = fs.readFileSync(file.path);
 
         const pdfData = await pdfParse(fileBuffer);
-        const extractedText = pdfData.text;
+        let extractedText = pdfData.text.trim();
+
+        if(extractedText.length<50){
+             console.log('No text found by pdf-parse. Triggering local Tesseract OCR...');
+
+             const pdfImages = await pdf2img.convert(fileBuffer);
+             let ocrText='';
+
+
+             for(let i=0; i< pdfImages.length;i++){
+                console.log(`Scanning page ${i + 1} with Tesseract...`);
+                // pdfImages[i] is a Uint8Array, so we wrap it in a Node Buffer
+                const result = await Tesseract.recognize(Buffer.from(pdfImages[i]), 'eng');
+                ocrText += result.data.text + '\n\n';
+             }
+
+             extractedText = ocrText.trim();
+            console.log('Tesseract successfully extracted the text locally!');
+
+        }
 
         const document = await this.prisma.document.create({
             data: {
@@ -34,7 +54,7 @@ export class DocumentsService {
                 type: file.mimetype, // pdf only
                 url: file.path, //path where it is saved
                 uploadStatus: 'COMPLETED',
-                text: extractedText,
+                text: extractedText, // ocr if normal failed;
                 userId: userId,
                 workspaceId: workspaceId || null,
             },

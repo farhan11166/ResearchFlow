@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import {CacheModule} from '@nestjs/cache-manager';
 import {redisStore}  from 'cache-manager-redis-yet';
 import { LoggerModule } from 'nestjs-pino';
+import { HealthModule } from './health/health.module';
 @Module({
   imports: [
     BullModule.forRoot({
@@ -55,7 +56,7 @@ import { LoggerModule } from 'nestjs-pino';
     PrismaModule, 
     DocumentsModule, 
     WorkspacesModule, 
-    AiModule, ChatModule
+    AiModule, ChatModule, HealthModule
   ],
   controllers: [AppController, ChatController],
   providers: [    {

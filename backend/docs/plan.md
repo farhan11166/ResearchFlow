@@ -40,17 +40,17 @@
 
 ### PHASE 6 — Advanced Features (Week 6)
 **Goal:** Add 2-3 advanced capabilities.
-- [ ] Citations (Highlight source chunks)
+- [x] Citations (Highlight source chunks)
 - [x] Multi-document Search (Query across many PDFs)
 - [x] Workspace Chat (Chat scoped to collections)
-- [ ] OCR (Support scanned PDFs)
+- [x] OCR (Support scanned PDFs)
 
 ### PHASE 7 — Deployment + Polish (Week 7)
 **Goal:** Make it resume-ready.
-- [ ] Dockerize Everything (Backend, Postgres, Redis, Qdrant)
-- [ ] CI/CD (GitHub Actions)
-- [ ] Swagger Docs (Auto-generated API docs)
-- [ ] Health Checks (Monitoring endpoints)
+- [x] Dockerize Everything (Backend, Postgres, Redis, Qdrant)
+- [x] CI/CD (GitHub Actions)
+- [x] Swagger Docs (Auto-generated API docs)
+- [x] Health Checks (Monitoring endpoints)
 - [ ] Environment Config Cleanup
 
 ### PHASE 8 — Final Polish (Week 8)
