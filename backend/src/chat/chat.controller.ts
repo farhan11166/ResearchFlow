@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Param,
   Res,
@@ -26,6 +27,57 @@ export class ChatController {
     return this.chatService.creachat(workspaceId, req.user.id);
   }
 
+  /**
+   * Simple one-shot chat endpoint for the frontend.
+   * Creates a chat session if needed, runs the full RAG pipeline,
+   * and returns the AI answer as a plain JSON response.
+   */
+  @Post('message')
+  async sendMessage(
+    @Body('message') message: string,
+    @Body('workspaceId') workspaceId: string,
+    @Body('chatId') chatId: string,
+    @Request() req,
+  ) {
+    if (!message) return { error: 'message is required' };
+
+    // Auto-create a chat session if none provided
+    let sessionId = chatId;
+    if (!sessionId && workspaceId) {
+      const chat = await this.chatService.creachat(workspaceId, req.user.id);
+      sessionId = chat.id;
+    }
+
+    if (sessionId) {
+      await this.chatService.savemsg(sessionId, 'USER', message);
+    }
+
+    const history = sessionId ? await this.chatService.getHist(sessionId) : [];
+
+    const allowedDocumentIds = sessionId
+      ? await this.chatService.getChatDocumentIds(sessionId, req.user.id)
+      : [];
+
+    const matches = await this.aiService.searchSimilarChunks(
+      message,
+      4,
+      allowedDocumentIds,
+    );
+    const contextTexts = matches.map((m) => String(m.text));
+
+    const answer = await this.aiService.generateAnswer(
+      message,
+      contextTexts,
+      history,
+    );
+
+    if (sessionId) {
+      await this.chatService.savemsg(sessionId, 'AI', answer);
+    }
+
+    return { response: answer, chatId: sessionId, sources: matches };
+  }
+
   @Post(':chatId/stream')
   async sendMsg(
     @Param('chatId') chatId: string,
@@ -34,7 +86,7 @@ export class ChatController {
     @Res() res: Response,
   ) {
     if (!query)
-      return res.status(400).json({ error: ' Search query is required' });
+      return res.status(400).json({ error: 'Search query is required' });
     await this.chatService.savemsg(chatId, 'USER', query);
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -56,7 +108,6 @@ export class ChatController {
     const contextTexts = matches.map((m) => String(m.text));
 
     try {
-      // Get the AI Stream pipe
       const stream = await this.aiService.generateAnswerStream(
         query,
         contextTexts,
@@ -76,12 +127,9 @@ export class ChatController {
       );
     } catch (error: any) {
       console.error('AI Error:', error);
-
-      // Dynamically extract the status and message from ANY error
       const statusCode = error.status || 500;
       const statusMessage =
         error.statusText || error.message || 'Internal Server Error';
-
       res.write(
         `data: ${JSON.stringify({
           error: true,
@@ -90,8 +138,21 @@ export class ChatController {
         })}\n\n`,
       );
     } finally {
-      // Always close the stream connection!
       res.end();
     }
+  }
+
+  @Get('history/:chatId')
+  async getHistory(@Param('chatId') chatId: string) {
+    return this.chatService.getHist(chatId);
+  }
+
+  @Get('workspace/:workspaceId')
+  async getWorkspaceChats(
+    @Param('workspaceId') workspaceId: string,
+    @Request() req,
+  ) {
+    const chats = await this.chatService.getWorkspaceChats(workspaceId, req.user.id);
+    return chats;
   }
 }

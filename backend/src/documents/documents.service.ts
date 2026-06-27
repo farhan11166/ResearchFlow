@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import pdfParse from 'pdf-parse';
@@ -10,6 +10,7 @@ import * as pdf2img from 'pdf-img-convert';
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new Logger(DocumentsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiService: AiService,
@@ -27,15 +28,13 @@ export class DocumentsService {
     let extractedText = pdfData.text.trim();
 
     if (extractedText.length < 50) {
-      console.log(
-        'No text found by pdf-parse. Triggering local Tesseract OCR...',
-      );
+      this.logger.warn('No text found by pdf-parse. Triggering local Tesseract OCR...');
 
       const pdfImages = await pdf2img.convert(fileBuffer);
       let ocrText = '';
 
       for (let i = 0; i < pdfImages.length; i++) {
-        console.log(`Scanning page ${i + 1} with Tesseract...`);
+        this.logger.log(`Scanning page ${i + 1} with Tesseract...`);
         // pdfImages[i] is a Uint8Array, so we wrap it in a Node Buffer
         const result = await Tesseract.recognize(
           Buffer.from(pdfImages[i]),
@@ -45,7 +44,7 @@ export class DocumentsService {
       }
 
       extractedText = ocrText.trim();
-      console.log('Tesseract successfully extracted the text locally!');
+      this.logger.log('Tesseract OCR completed successfully.');
     }
 
     const document = await this.prisma.document.create({
@@ -77,5 +76,24 @@ export class DocumentsService {
     );
 
     return document;
+  }
+
+  async getDocuments(userId: string, workspaceId?: string) {
+    return this.prisma.document.findMany({
+      where: {
+        userId,
+        ...(workspaceId ? { workspaceId } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        filename: true,
+        size: true,
+        type: true,
+        uploadStatus: true,
+        createdAt: true,
+        workspaceId: true,
+      },
+    });
   }
 }

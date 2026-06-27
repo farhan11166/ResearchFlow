@@ -55,7 +55,7 @@
 
 ### PHASE 8 — Final Polish (Week 8)
 **Goal:** Turn project into portfolio-quality work.
-- [ ] README (Architecture, setup, screenshots, API docs)
-- [ ] Architecture Diagram (API flow, queues, vector DB, Redis, workers)
+- [x] README (Architecture, setup, screenshots, API docs)
+- [x] Architecture Diagram (API flow, queues, vector DB, Redis, workers)
 - [ ] Demo Video (2–3 minutes showing flow)
 - [ ] Testing (Auth tests, search tests)

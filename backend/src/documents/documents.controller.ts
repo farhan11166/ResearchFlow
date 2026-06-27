@@ -1,6 +1,8 @@
 import {
   Controller,
   Post,
+  Get,
+  Query,
   UseInterceptors,
   UploadedFile,
   UseGuards,
@@ -14,11 +16,16 @@ import { extname } from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { DocumentsService } from './documents.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentService: DocumentsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @Get()
+  getDocuments(@Request() req, @Query('workspaceId') workspaceId?: string) {
+    return this.documentService.getDocuments(req.user.id, workspaceId);
+  }
+
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -32,12 +39,15 @@ export class DocumentsController {
           cb(null, `${randomName}${extname(file.originalname)}`);
         },
       }),
-      /*fileFilter: (req, file, cb) => {
+      limits: {
+        fileSize: 20 * 1024 * 1024, // 20MB max
+      },
+      fileFilter: (req, file, cb) => {
         if (file.mimetype !== 'application/pdf') {
           return cb(new Error('Only PDF files are allowed'), false);
         }
         cb(null, true);
-      },*/
+      },
     }),
   )
   async uploadFile(

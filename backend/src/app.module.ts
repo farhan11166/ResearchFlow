@@ -7,8 +7,6 @@ import { DocumentsModule } from './documents/documents.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { AiModule } from './ai/ai.module';
 import { BullModule } from '@nestjs/bullmq';
-import { ChatService } from './chat/chat.service';
-import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -20,8 +18,8 @@ import { HealthModule } from './health/health.module';
   imports: [
     BullModule.forRoot({
       connection: {
-        host: 'localhost',
-        port: 6379,
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT ?? '6379'),
       },
     }),
     ThrottlerModule.forRoot([
@@ -35,8 +33,8 @@ import { HealthModule } from './health/health.module';
       useFactory: async () => ({
         store: await redisStore({
           socket: {
-            host: 'localhost',
-            port: 6379,
+            host: process.env.REDIS_HOST || 'localhost',
+            port: parseInt(process.env.REDIS_PORT ?? '6379'),
           },
           ttl: 30000,
         }),
@@ -60,14 +58,13 @@ import { HealthModule } from './health/health.module';
     ChatModule,
     HealthModule,
   ],
-  controllers: [AppController, ChatController],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
     AppService,
-    ChatService,
   ],
 })
 export class AppModule {}

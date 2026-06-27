@@ -5,12 +5,25 @@ import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { Logger } from 'nestjs-pino';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+const cookieParser = require('cookie-parser');
+import helmet from 'helmet';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const compression = require('compression');
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useLogger(app.get(Logger)); // enable pino
+  app.useLogger(app.get(Logger));
 
-  app.enableCors();
+  app.use(cookieParser());
+  app.use(helmet());
+  app.use(compression());
+
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    credentials: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,6 +41,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  app.enableShutdownHooks();
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

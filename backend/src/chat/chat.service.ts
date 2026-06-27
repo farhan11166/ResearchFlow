@@ -60,4 +60,15 @@ export class ChatService {
     // Return an array of pure document IDs (e.g. ["doc1", "doc2"])
     return chat.workspace.documents.map((doc) => doc.id);
   }
+
+  async getWorkspaceChats(workspaceId: string, userId: string) {
+    const workspace = await this.prisma.workspace.findUnique({ where: { id: workspaceId } });
+    if (!workspace) throw new NotFoundException('Workspace not found');
+    if (workspace.userId !== userId) throw new ForbiddenException('You do not own this workspace!');
+
+    return this.prisma.chat.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
