@@ -11,7 +11,8 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.register({
       secret: (() => {
         const s = process.env.JWT_SECRET;
-        if (!s) throw new Error('JWT_SECRET env variable is required but not set!');
+        if (!s)
+          throw new Error('JWT_SECRET env variable is required but not set!');
         return s;
       })(),
       signOptions: { expiresIn: '15m' },

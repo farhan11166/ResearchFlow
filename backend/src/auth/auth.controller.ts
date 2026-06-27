@@ -16,7 +16,7 @@ import { SignupDto, LoginDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 const COOKIE_OPTIONS = {
-  httpOnly: true,      // ← JS cannot read this — XSS protection
+  httpOnly: true, // ← JS cannot read this — XSS protection
   secure: process.env.NODE_ENV === 'production', // HTTPS-only in prod
   sameSite: 'lax' as const,
   maxAge: 15 * 60 * 1000, // 15 minutes in ms (matches JWT expiry)
@@ -29,7 +29,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
+  async signup(
+    @Body() dto: SignupDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.authService.signup(dto);
     res.cookie('access_token', result.access_token, COOKIE_OPTIONS);
     return { message: 'Account created successfully' };
@@ -37,7 +40,10 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.authService.login(dto);
     res.cookie('access_token', result.access_token, COOKIE_OPTIONS);
     return { message: 'Logged in successfully' };

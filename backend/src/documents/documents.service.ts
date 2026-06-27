@@ -28,7 +28,9 @@ export class DocumentsService {
     let extractedText = pdfData.text.trim();
 
     if (extractedText.length < 50) {
-      this.logger.warn('No text found by pdf-parse. Triggering local Tesseract OCR...');
+      this.logger.warn(
+        'No text found by pdf-parse. Triggering local Tesseract OCR...',
+      );
 
       const pdfImages = await pdf2img.convert(fileBuffer);
       let ocrText = '';

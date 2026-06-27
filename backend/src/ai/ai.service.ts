@@ -14,14 +14,18 @@ export class AiService implements OnModuleInit {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
     this.genAI = new GoogleGenerativeAI(apiKey.trim());
-    this.qdrant = new QdrantClient({ url: process.env.QDRANT_URL || 'http://localhost:6333' });
+    this.qdrant = new QdrantClient({
+      url: process.env.QDRANT_URL || 'http://localhost:6333',
+    });
   }
 
   async onModuleInit() {
     const collectionName = 'documents';
     try {
       const collections = await this.qdrant.getCollections();
-      const exists = collections.collections.some(c => c.name === collectionName);
+      const exists = collections.collections.some(
+        (c) => c.name === collectionName,
+      );
       if (!exists) {
         this.logger.log(`Creating Qdrant collection: ${collectionName}...`);
         await this.qdrant.createCollection(collectionName, {
@@ -40,13 +44,15 @@ export class AiService implements OnModuleInit {
       chunkOverlap: 200,
     });
     const chunks = await splitter.createDocuments([text]);
-    return chunks.map(chunk => chunk.pageContent);
+    return chunks.map((chunk) => chunk.pageContent);
   }
 
   async embedChunks(chunks: string[]): Promise<number[][]> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-embedding-2' });
+    const model = this.genAI.getGenerativeModel({
+      model: 'gemini-embedding-2',
+    });
     return Promise.all(
-      chunks.map(async chunk => {
+      chunks.map(async (chunk) => {
         const result = await model.embedContent(chunk);
         return result.embedding.values;
       }),
@@ -65,11 +71,19 @@ export class AiService implements OnModuleInit {
     }));
 
     await this.qdrant.upsert('documents', { wait: true, points });
-    this.logger.log(`Stored ${points.length} chunks for document ${documentId}`);
+    this.logger.log(
+      `Stored ${points.length} chunks for document ${documentId}`,
+    );
   }
 
-  async searchSimilarChunks(query: string, limit: number = 4, documentIds?: string[]) {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-embedding-2' });
+  async searchSimilarChunks(
+    query: string,
+    limit: number = 4,
+    documentIds?: string[],
+  ) {
+    const model = this.genAI.getGenerativeModel({
+      model: 'gemini-embedding-2',
+    });
     const result = await model.embedContent(query);
     const queryVector = result.embedding.values;
 
@@ -85,7 +99,7 @@ export class AiService implements OnModuleInit {
       with_payload: true,
     });
 
-    return searchResults.map(match => ({
+    return searchResults.map((match) => ({
       score: match.score,
       text: match.payload?.text,
       documentId: match.payload?.documentId,
@@ -102,7 +116,10 @@ export class AiService implements OnModuleInit {
       .join('\n\n---\n\n');
 
     const historyText = chatHistory
-      .map(msg => `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .map(
+        (msg) =>
+          `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`,
+      )
       .join('\n\n');
 
     const prompt = `
@@ -139,7 +156,10 @@ ${query}
       .join('\n\n---\n\n');
 
     const historyText = chatHistory
-      .map(msg => `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .map(
+        (msg) =>
+          `${msg.role === 'USER' ? 'User' : 'Assistant'}: ${msg.content}`,
+      )
       .join('\n\n');
 
     const prompt = `

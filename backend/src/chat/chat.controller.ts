@@ -152,7 +152,10 @@ export class ChatController {
     @Param('workspaceId') workspaceId: string,
     @Request() req,
   ) {
-    const chats = await this.chatService.getWorkspaceChats(workspaceId, req.user.id);
+    const chats = await this.chatService.getWorkspaceChats(
+      workspaceId,
+      req.user.id,
+    );
     return chats;
   }
 }

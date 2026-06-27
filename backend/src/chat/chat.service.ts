@@ -62,9 +62,12 @@ export class ChatService {
   }
 
   async getWorkspaceChats(workspaceId: string, userId: string) {
-    const workspace = await this.prisma.workspace.findUnique({ where: { id: workspaceId } });
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+    });
     if (!workspace) throw new NotFoundException('Workspace not found');
-    if (workspace.userId !== userId) throw new ForbiddenException('You do not own this workspace!');
+    if (workspace.userId !== userId)
+      throw new ForbiddenException('You do not own this workspace!');
 
     return this.prisma.chat.findMany({
       where: { workspaceId },
